@@ -1,4 +1,4 @@
-import { attr, createSelector as createOrmSelector, fk, many, Model, MutableQuerySet, ORM, QuerySet } from 'redux-orm';
+import { attr, createSelector as createOrmSelector, fk, many, Model, MutableQuerySet, ORM, QuerySet } from '.';
 
 interface CreateBookAction {
     type: 'CREATE_BOOK';
