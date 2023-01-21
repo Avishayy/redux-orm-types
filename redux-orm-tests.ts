@@ -25,10 +25,10 @@ class Book extends Model<typeof Book> {
         title: attr(),
         coverArt: attr({ getDefault: () => 'empty.png' }),
         publisher: fk('Publisher', 'books'),
-        authors: many({ to: 'Person', relatedName: 'books', through: 'Authorship' })
+        authors: many({ to: 'Person', relatedName: 'books', through: 'Authorship' }),
     };
     static options = {
-        idAttribute: 'title' as const
+        idAttribute: 'title' as const,
     };
     static reducer(action: RootAction, book: typeof Book) {
         switch (action.type) {
@@ -58,7 +58,7 @@ class Person extends Model<typeof Person> {
         id: attr(),
         firstName: attr(),
         lastName: attr(),
-        nationality: attr()
+        nationality: attr(),
     };
 }
 
@@ -74,7 +74,7 @@ class Authorship extends Model<typeof Authorship> {
     static fields = {
         year: attr(),
         book: fk('Book'),
-        author: fk('Person')
+        author: fk('Person'),
     };
 }
 
@@ -88,10 +88,10 @@ class Publisher extends Model<typeof Publisher> {
     static modelName = 'Publisher' as const;
     static fields = {
         index: attr(),
-        name: attr()
+        name: attr(),
     };
     static options = {
-        idAttribute: 'index' as const
+        idAttribute: 'index' as const,
     };
 }
 
@@ -166,7 +166,7 @@ const sessionFixture = () => {
     Book.create({
         title: 'B1',
         publisher: publisherModel.index,
-        authors: [authorModel, 'A1', authorModel, authorModel.ref.id]
+        authors: [authorModel, 'A1', authorModel, authorModel.ref.id],
     });
 
     /** Id types are verified to match relation target */
@@ -265,7 +265,7 @@ const sessionFixture = () => {
     const extendedBook = Book.create({
         title: 'extendedBook',
         publisher: 1,
-        customProp
+        customProp,
     });
 
     type customBookKeys = Exclude<keyof typeof extendedBook, keyof Model>; // $ExpectType "title" | "coverArt" | "publisher" | "authors" | "customProp"
@@ -297,8 +297,8 @@ const sessionFixture = () => {
     // $ExpectType readonly Ref<Book>[]
     booksQuerySet
         .orderBy('title')
-        .orderBy(book => book.publisher, 'desc')
-        .orderBy(book => book.title, false)
+        .orderBy((book) => book.publisher, 'desc')
+        .orderBy((book) => book.title, false)
         .orderBy('publisher', 'asc')
         .orderBy('publisher', true)
         .toRefArray();
@@ -307,17 +307,17 @@ const sessionFixture = () => {
     booksQuerySet
         .orderBy(['title'], ['asc'])
         .orderBy(['publisher', 'title'], [true, 'desc'])
-        .orderBy([book => book.title], ['desc'])
+        .orderBy([(book) => book.title], ['desc'])
         .orderBy(['title'])
-        .orderBy([book => book.title, 'publisher'], ['desc', false])
+        .orderBy([(book) => book.title, 'publisher'], ['desc', false])
         .toRefArray();
 
     booksQuerySet.orderBy('notABookPropertyKey'); // $ExpectError
-    booksQuerySet.orderBy([book => book.notABookPropertyKey], false); // $ExpectError
+    booksQuerySet.orderBy([(book) => book.notABookPropertyKey], false); // $ExpectError
     booksQuerySet.orderBy('title', 'inc'); // $ExpectError
     booksQuerySet.orderBy('title', 4); // $ExpectError
     booksQuerySet.orderBy(['notABookPropertyKey']); // $ExpectError
-    booksQuerySet.orderBy([book => book.notABookPropertyKey]); // $ExpectError
+    booksQuerySet.orderBy([(book) => book.notABookPropertyKey]); // $ExpectError
     booksQuerySet.orderBy(['title'], ['inc']); // $ExpectError
     booksQuerySet.orderBy(['title'], [4]); // $ExpectError
 })();
@@ -325,23 +325,23 @@ const sessionFixture = () => {
 // selectors
 (() => {
     // test fixture, use reselect.createSelector in production code
-    const createSelector = <S, OS extends ORM.State<any>, Result extends any>(
-        param1Creator: (state: S) => OS,
-        combiner: (param1: OS) => Result
-    ): ((state: S) => Result) => state => combiner(param1Creator(state));
+    const createSelector =
+        <S, OS extends ORM.State<any>, Result extends any>(
+            param1Creator: (state: S) => OS,
+            combiner: (param1: OS) => Result
+        ): ((state: S) => Result) =>
+        (state) =>
+            combiner(param1Creator(state));
 
     const orm = ormFixture();
 
-    const ormSelector = createOrmSelector(orm, session => session.Book.all().toRefArray()[0]);
+    const ormSelector = createOrmSelector(orm, (session) => session.Book.all().toRefArray()[0]);
 
     interface RootState {
         db: ORM.State<Schema>;
     }
 
-    const selector = createSelector<RootState, ORM.State<Schema>, Model.Ref<Book>>(
-        ({ db }) => db,
-        ormSelector
-    );
+    const selector = createSelector<RootState, ORM.State<Schema>, Model.Ref<Book>>(({ db }) => db, ormSelector);
 
     selector({ db: orm.getEmptyState() }); // $ExpectType Ref<Book>
 
@@ -363,76 +363,80 @@ const sessionFixture = () => {
 
     type TestSelector = (state: RootState) => Model.Ref<Book>;
 
-    const selector0 = createOrmSelector(orm, s => s.db, session => session.Book.first()!.ref) as TestSelector;
+    const selector0 = createOrmSelector(
+        orm,
+        (s) => s.db,
+        (session) => session.Book.first()!.ref
+    ) as TestSelector;
 
     const selector1 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.bar,
+        (s) => s.db,
+        (s) => s.bar,
         (session, title) => session.Book.get({ title })!.ref
     ) as TestSelector;
 
     const selector2 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
-        s => s.bar,
+        (s) => s.db,
+        (s) => s.foo,
+        (s) => s.bar,
         (session, id, title) => session.Book.get({ id, title })!.ref
     ) as TestSelector;
 
     const selector3 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
+        (s) => s.db,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
         (session, id, title, id2) => session.Book.get({ id, title, id2 })!.ref
     ) as TestSelector;
 
     const selector4 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
-        s => s.bar,
+        (s) => s.db,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
+        (s) => s.bar,
         (session, id, title, id2, title2) => session.Book.get({ id, title, id2, title2 })!.ref
     ) as TestSelector;
 
     const selector5 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
+        (s) => s.db,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
         (session, ...args) => session.Book.get({ title: args[1] })!.ref
     ) as TestSelector;
 
     const selector6 = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
-        s => s.bar,
-        s => s.foo,
-        s => s.bar,
+        (s) => s.db,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
+        (s) => s.bar,
+        (s) => s.foo,
+        (s) => s.bar,
         (session, id, title) => session.Book.get({ title })!.ref
     ) as TestSelector;
 
     const invalidSelector = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
+        (s) => s.db,
+        (s) => s.foo,
         (session, foo, missingArg) => foo // $ExpectError
     ) as (state: RootState) => number;
 
     const invalidSelector2: TestSelector = createOrmSelector(
         orm,
-        s => s.db,
-        s => s.foo,
+        (s) => s.db,
+        (s) => s.foo,
         (session, foo) => session.Book.withId(foo)!.ref // $ExpectError
     );
 
