@@ -37,7 +37,8 @@ export class ORM<S extends ORM.Schema, ORegistry extends ORM.Registry<S> = ORM.R
      *
      * @param  model - a {@link Model} class to register
      */
-    register(...model: ReadonlyArray<S[number]>): void;
+    // TODO: it should return a modelselectorspec, which is not typed yet
+    register(...model: ReadonlyArray<S[number]>): asserts this is this & Record<S[number]['modelName'], any>;
 
     /**
      * Gets a {@link Model} class by its name from the registry.

@@ -99,7 +99,7 @@ type Schema = [typeof Book, typeof Authorship, typeof Person, typeof Publisher];
 
 // create ORM instance and register { Book, Publisher, Person, Authorship } schema
 const ormFixture = () => {
-    const orm = new ORM<Schema>();
+    const orm: ORM<Schema> = new ORM<Schema>();
     orm.register(Book, Authorship, Person, Publisher);
     return orm;
 };
@@ -217,7 +217,9 @@ const sessionFixture = () => {
 
 // restriction of allowed ORM.register args
 (() => {
-    const orm = new ORM<[typeof Book, typeof Authorship, typeof Person]>();
+    const orm: ORM<[typeof Book, typeof Authorship, typeof Person]> = new ORM<
+        [typeof Book, typeof Authorship, typeof Person]
+    >();
     orm.register(Book, Authorship, Person, Publisher); // $ExpectError
 })();
 
